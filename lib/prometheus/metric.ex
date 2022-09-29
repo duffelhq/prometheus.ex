@@ -64,7 +64,9 @@ defmodule Prometheus.Metric do
 
     quote do
       def __declare_prometheus_metrics__() do
-        if List.keymember?(Application.started_applications(), :prometheus, 0) do
+        prometheus_started = List.keymember?(Application.started_applications(), :prometheus, 0)
+        IO.puts("attempting to insert #{mod}, prometheus started: #{prometheus_started}")
+        if prometheus_started do
           unquote_splicing(Enum.map(declarations, &emit_create_metric/1))
           :ok
         else
