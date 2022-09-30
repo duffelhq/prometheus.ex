@@ -97,21 +97,23 @@ defmodule Prometheus.Metric do
         end
 
       on_load ->
-        IO.inspect("METRIC #{inspect(env.module)} HAD AN ON_LOAD")
+        IO.inspect("METRIC #{inspect(__MODULE__)} HAD AN ON_LOAD #{inspect(on_load)}")
         Module.delete_attribute(env.module, :on_load)
+        |> IO.inspect(limit: :infinity, label: "deleted attr")
         Module.put_attribute(env.module, :on_load, :__prometheus_on_load_override__)
+        |> IO.inspect(limit: :infinity, label: "putted attr")
 
         quote do
           def __prometheus_on_load_override__() do
-            case unquote(on_load)() do
+            case unquote(on_load)() |> IO.inspect(limit: :infinity, label: "ONE LOAD RUN") do
               :ok ->
                 "DECLARING METRICS"|> IO.inspect(limit: :infinity, label: "")
-                res = __declare_prometheus_metrics__()|> IO.inspect(limit: :infinity, label: "DECLARE METRICS RESULY")
+                res = __declare_prometheus_metrics__()|> IO.inspect(limit: :infinity, label: "DECLARE METRICS RESULT")
                 "METRRICS DECLARED!"|> IO.inspect(limit: :infinity, label: "")
                 res
 
               result ->
-                IO.inspect("METRIC #{inspect(env.module)}'s ONLOAD DID NOT RETURN :ok")
+                IO.inspect("METRIC #{inspect(__MODULE__)}'s ONLOAD DID NOT RETURN :ok")
 
                 result
                 |> IO.inspect(limit: :infinity, label: "ACTUAL ONLOAD RETURN ")

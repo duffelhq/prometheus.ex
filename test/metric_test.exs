@@ -34,10 +34,13 @@ defmodule Prometheus.MetricTest do
       @on_load :custom_on_load_fun
 
       def custom_on_load_fun() do
+        "RAN CUSTOM ON LOAD FUN" |> IO.inspect(limit: :infinity, label: "")
         Counter.declare(name: :custom_counter, labels: [], help: "qwe")
         :ok
       end
     end
+
+    # ModuleWithMetrics.__prometheus_on_load_override__()
 
     defmodule ModuleWithoutOnLoad do
       use Prometheus.Metric
