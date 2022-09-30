@@ -64,7 +64,9 @@ defmodule Prometheus.Metric do
 
     quote do
       def __declare_prometheus_metrics__() do
-        prometheus_started = List.keymember?(Application.started_applications(), :prometheus, 0)
+        prometheus_started =
+          List.keymember?(Application.started_applications(), :prometheus, 0)
+
         if prometheus_started do
           unquote_splicing(Enum.map(declarations, &emit_create_metric/1))
           :ok
@@ -95,14 +97,24 @@ defmodule Prometheus.Metric do
         end
 
       on_load ->
+        IO.inspect("METRIC #{inspect(env.module)} HAD AN ON_LOAD")
         Module.delete_attribute(env.module, :on_load)
         Module.put_attribute(env.module, :on_load, :__prometheus_on_load_override__)
 
         quote do
           def __prometheus_on_load_override__() do
             case unquote(on_load)() do
-              :ok -> __declare_prometheus_metrics__()
-              result -> result
+              :ok ->
+                "DECLARING METRICS"|> IO.inspect(limit: :infinity, label: "")
+                res = __declare_prometheus_metrics__()|> IO.inspect(limit: :infinity, label: "DECLARE METRICS RESULY")
+                "METRRICS DECLARED!"|> IO.inspect(limit: :infinity, label: "")
+                res
+
+              result ->
+                IO.inspect("METRIC #{inspect(env.module)}'s ONLOAD DID NOT RETURN :ok")
+
+                result
+                |> IO.inspect(limit: :infinity, label: "ACTUAL ONLOAD RETURN ")
             end
           end
         end
