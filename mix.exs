@@ -60,7 +60,7 @@ defmodule PrometheusEx.Mixfile do
 
   defp deps do
     [
-      {:prometheus, "~> 4.0"},
+      {:prometheus, git: "https://github.com/duffelhq/prometheus.erl", branch: "master"},
 
       ## test
       {:credo, "~> 1.0", only: [:dev, :test]},
